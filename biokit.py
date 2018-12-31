@@ -9,6 +9,7 @@ import numpy as np
 import copy
 import time
 
+### git commit test
 class Fasta:
     
     def __init__(self, fasta_path):
