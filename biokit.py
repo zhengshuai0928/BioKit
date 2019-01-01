@@ -9,55 +9,27 @@ import numpy as np
 import copy
 import time
 
-### git commit test
 class Fasta:
     
-    def __init__(self, fasta_path):
-        
-        self.fasta_path = fasta_path
-        fasta_file = open(fasta_path)
-
-        # create fasta dictionary
+    def __init__(self, fasta_path):        
         self._fasta = {}
-        for line in fasta_file:
-            line = line.strip()    # trailing '\n' is removed
-            if line.startswith('>'):
-                identifier = line
-                self._fasta[identifier] = ''
+        self._fasta_len = {}      # Recording length of every sequence
+        self.number = 0
+        self.total_len = 0
+        for line in open(fasta_path):
+            line = line.strip()
+            if not line: 
                 continue
-            seq = line.upper()     # change to upper case
-            self._fasta[identifier] += seq
-        #
-
-        self._define_attr()
-    
-    def _define_attr(self):
-        
-        # attributes: identifiers, number and length
-        self.identifiers = list(self._fasta.keys())
-        self.number = len(self.identifiers)
-        self.length = 0
-        for key in self.identifiers:
-            self.length += len(self._fasta[key])
-        #
-
-        # create a nested list, containing fasta identifier and seq in 
-        # descending order
-        # attributes: the longest sequence, the shortest sequence and len
-        self._fasta_in_desc = Fasta._to_desc_order(self._fasta)
-        self.longest_seq = self._fasta_in_desc[0]
-        self.shortest_seq = self._fasta_in_desc[-1]
-        self.len = Length(self._fasta, self.fasta_path)
-        #
-
-    def _to_desc_order(fasta):
-        
-        desc = []
-        for key, value in fasta.items():
-            desc.append([key, value])
-        desc.sort(key=lambda item: len(item[-1]))
-        desc.reverse()
-        return desc
+            if line.startswith('>'):
+                self.number += 1
+                _id = line
+                self._fasta[_id] = ''
+                self._fasta_len[_id] = 0
+                continue
+            _seq = line.upper()
+            self._fasta[_id] += _seq
+            self.total_len += len(_seq)           
+            self._fasta_len[_id] += len(_seq)
 
     def __getitem__(self, identifier):
         
@@ -108,7 +80,7 @@ class Fasta:
         else:
             print('No duplicates!')
         
-        self._define_attr()
+        self._setAttrs()
 
     def tofile(self, outpath):
         out = open(outpath, 'w')
