@@ -17,16 +17,13 @@ class Fasta:
         self._fasta_len = {}      # Recording length of every sequence
         self.number = 0
         self.total_len = 0   
-        
         fasta_lines = open(fasta_path).readlines()
         total_lines = len(fasta_lines)
-        
         each_part = total_lines / 50
         count = 0
         
         time1 = time.time()
-        
-        _tmp = open('biokit.fasta.tmp', 'w')
+        _seq = ''
         for line in fasta_lines:
             count += 1
             progress_count = int(count / each_part) 
@@ -39,31 +36,23 @@ class Fasta:
             if not line: 
                 continue
             if line.startswith('>'):
-                self.number += 1
-                _tmp.write('\n')
-                _tmp.write(line + '\n')
+                _id = line
+                if not _seq:
+                    last_id = _id
+                    continue
+                self._fasta[last_id] = _seq
+                last_id = _id
+                _seq = ''
                 continue
-            _seq = line.upper()
-            _tmp.write(_seq)
-            self.total_len += len(_seq)
-
-        _tmp.write('\n')           
-        _tmp.close()
+            
+            _seq += line.upper()
+            self.total_len += len(_seq)           
+        self._fasta[last_id] = _seq
         
         del fasta_lines
         gc.collect()
         sys.stdout.write('\n')
-        
-        _tmp = open('biokit.fasta.tmp')
-        _tmp.readline()
-        for line in _tmp:
-            if line.startswith('>'):
-                _id = line.strip()
-                self._fasta[_id] = ''
-            self._fasta[_id] = line.strip().upper()
-        _tmp.close()
-        os.remove('biokit.fasta.tmp')
-        
+
         time2 = time.time()
         print(time2-time1)
 
