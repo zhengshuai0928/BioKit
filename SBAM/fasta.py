@@ -125,7 +125,8 @@ class Fasta:
         a_count = 0
         t_count = 0
         n_count = 0
-        count = 0
+        others  = 0
+        count   = 0
         print('Counting...')
         for key in self._fasta:
             count += 1
@@ -136,10 +137,14 @@ class Fasta:
             t_count += self._fasta[key].count('T')
             n_count += self._fasta[key].count('N')
         sys.stdout.write('\n')
-        p_format = '{:>5}\t{:<.2f}'
+        others = total_len - g_count - c_count \
+                           - a_count - t_count \
+                           - n_count
+        p_format = '{:>10}\t{:<.2f}'
         print('-' * 50)
         print(p_format.format('G%:', g_count/total_len*100))
         print(p_format.format('C%:', c_count/total_len*100))
         print(p_format.format('A%:', a_count/total_len*100))
         print(p_format.format('T%:', t_count/total_len*100))
         print(p_format.format('N%:', n_count/total_len*100))
+        print(p_format.format('Others%:', others/total_len*100))
