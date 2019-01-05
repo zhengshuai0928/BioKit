@@ -1,7 +1,6 @@
 import gc
 import re
 import sys
-from SBAM.fasta import progressBar
 
 class EmptyTable(Exception):
     def __str__(self):
@@ -73,8 +72,6 @@ class Table:
         self._data = []
         for _list in table_lines:
             self._data.append(Col(_list))
-        del table_lines
-        gc.collect()
     
     def __getitem__(self, _index):
         if isinstance(_index, slice):
@@ -159,9 +156,6 @@ class Table:
             else:
                 fail_filter.append(col)
         self._data = pass_filter
-        del pass_filter
-        del fail_filter
-        gc.collect()
         sys.stdout.write('\n')
         self.row_num = len(self._data)
 
@@ -228,3 +222,46 @@ class Blast(Table):
                 print('#'*3, file=out)
                 last_sid = sid
             print('\t'.join(item[:]), file=out)
+
+class Gff3:
+
+    def __init__(self, gff3_path):
+        self.gff3_header = ['seqid', 'source','type', 'start', 'end', 
+                            'score', 'strand', 'phase', 'attributes']
+        gff3_lines = []
+        for line in open(gff3_path):
+            if line.startswith('#'):
+                continue
+            if line == '\n':
+                continue
+            gff3_lines.append(line.strip('\n').split('\t'))
+        # Get the top level feature type of the GFF3
+        top_type = gff3_lines[0][2] 
+        anno_list = []
+        for line_list in gff3_lines:
+            _type = line_list[2]
+            if _type == top_type:
+                anno_list.append([self.gff3_header, line_list])
+                continue
+            anno_list[-1].append(line_list)
+        self.anno_num = len(anno_list)
+        # Transform each anno into a Table obj 
+        self._data = []
+        for anno in anno_list:
+            self._data.append(Table(anno, header=True))
+    
+    def __getitem__(self, _index):
+        return self._data[_index]
+
+    def pop(self, row_index):
+        self._data.pop(row_index)
+        self.anno_num -= 1
+    
+    def toFile(self, out_path, mode='w'):
+        out = open(out_path, mode)
+        out.write('##gff-version 3\n')
+        for anno in self._data:
+            for item in anno:
+                out.write('\t'.join(item[:]) + '\n')
+            out.write('###\n')
+            

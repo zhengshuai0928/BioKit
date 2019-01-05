@@ -3,14 +3,9 @@ import os
 import sys
 import re
 import gc
+from sbam import progressBar
 from SBAM.length import *
-
-def progressBar(symbol, symbol_num, count, total):
-    symbol_count = int(count / (total / symbol_num))
-    sys.stdout.write('\r')
-    sys.stdout.write(('[%-50s]%.2f%%' % ((symbol 
-                      * symbol_count), count / total * 100)))
-    sys.stdout.flush()
+from SBAM.table import *
 
 class Fasta:
 
@@ -88,14 +83,9 @@ class Fasta:
                   len(dup_keys))
         else:
             print('No duplicates!')
-        # Release memeory
-        del visited_seqs
-        del reverse_dict
-        gc.collect()
-        #
         self.setAttrs()
 
-    def getSeqs(self, _id_source, out_path, mode='w'):
+    def getseqs_id(self, _id_source, out_path, mode='w'):
         out = open(out_path, mode)
         _idlist = []
         if os.path.isfile(_id_source):
@@ -106,6 +96,28 @@ class Fasta:
             _id = _id.strip()
             out.write(_id + '\n')
             out.write(self[_id] + '\n')
+        out.close()
+
+    def getseqs_gff(self, gff3_path, feature, out_path, mode='w'):
+        out = open(out_path, mode)
+        gf = Gff3(gff3_path)
+        for anno in gf:
+            top_level = anno[0]
+            seqid  = '>' + top_level['seqid']
+            strand = top_level['strand']
+            title = '_'.join((seqid, 
+                              top_level['start'], 
+                              top_level['end']))
+            seq = ''
+            for line in anno:
+                if line['type'] == feature:
+                    start = int(line['start']) - 1
+                    end = int(line['end'])
+                    seq += self[seqid][start:end]
+            if strand == '-':
+                seq = seq[::-1]
+            out.write(title + '\n')
+            out.write(seq + '\n')
         out.close()
 
     def keys(self):
