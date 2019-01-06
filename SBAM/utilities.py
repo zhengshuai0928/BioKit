@@ -1,6 +1,6 @@
 from SBAM.fasta import Fasta
 import os
-import subprocess
+import glob
 
 class Cluster:
     
@@ -36,7 +36,7 @@ class Cluster:
             out.write(self.fasta[seq_id] + '\n')
         out.close()
 
-    def muscle(self, clstr_no, fasta_path, out_path='', mode='w', fmt='-clw'):
+    def muscle(self, clstr_no, fasta_path, out_path='', mode='w', fmt=''):
         tmp_file = '.cluster.seq.tmp'
         self.getCluSeq(clstr_no, fasta_path, tmp_file)
         muscle_str = ' '.join(('muscle', '-in', tmp_file, '-out',
@@ -44,16 +44,16 @@ class Cluster:
         os.system(muscle_str)
         os.remove(tmp_file)
 
-    def muscleShow(self, clstr_no, fasta_path):
+    def muscleShow(self, clstr_no, fasta_path, fmt='-clw'):
         out_path = 'cluster_%s_muscle.aln'% clstr_no
-        self.muscle(clstr_no, fasta_path, out_path)
+        self.muscle(clstr_no, fasta_path, out_path, fmt=fmt)
         out = open(out_path)
         for line in out:
             if not line: break
             print(line, end='')
         out.close() 
 
-def blast2seqs():
+def _blast2seqs():
     seq1 = input('Please input first  seq: ')
     seq2 = input('Please input second seq: ')
     _type = ''
@@ -64,39 +64,41 @@ def blast2seqs():
     fas_file = open(qpath, 'w')
     fas_file.write('>seq1' + '\n')
     fas_file.write(seq1.upper() + '\n')
-    fas_file.close()
-    
+    fas_file.close()   
     fas_file = open(dbpath, 'w')
     fas_file.write('>seq2' + '\n')
     fas_file.write(seq2.upper() + '\n')
     fas_file.close()
-    
-    db_files = []
-    db_files.append(dbpath + '.nhr')
-    db_files.append(dbpath + '.nin')
-    db_files.append(dbpath + '.nsq')
-
     db_cmd = 'makeblastdb -in %s -dbtype %s \
               -logfile .makeblastdb_log'%(dbpath, _type)
     os.system(db_cmd)
-
     if _type == 'nucl':
         task = 'blastn'
     if _type == 'prot':
         task = 'blastp'
-
-    blast_cmd = '%s -query %s -db %s -task %s'%
+    blast_cmd = '%s -query %s -db %s -task %s'% \
                 (task, qpath, dbpath, task)
     out = os.popen(blast_cmd).read()
     os.wait()
+    print('-' * 50)
     out_list = out.split('\n')
     for line in out_list:
         if line == '':
             continue
         print(line)
+    print('-' * 50)
     os.remove('.makeblastdb_log.perf')
     os.remove('.makeblastdb_log')
     os.remove(qpath)
     os.remove(dbpath)
-    for file_name in db_files:
+    for file_name in glob.glob(dbpath + '.*'):
         os.remove(file_name)
+    go_on = ''
+    while not go_on in ['Y', 'y', 'N', 'n']:
+        go_on = input('Go on? (y/Y/n/N): ')
+    return go_on
+
+def blast2seqs():
+    go_on = 'y'
+    while go_on in ['Y', 'y']:
+        go_on = _blast2seqs()
