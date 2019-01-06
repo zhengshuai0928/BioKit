@@ -14,10 +14,11 @@ class Fasta:
         self._fasta = {}
         line_count = os.popen('wc -l %s'%fasta_path).read()
         line_num = int(line_count.split(' ')[0])
-        count = 0
+        count = 1
         _seq = ''
         fasta_file = open(fasta_path)
         _id_last = fasta_file.readline().strip()
+        progressBar('#', 50, count, line_num)
         for line in fasta_file:
             count += 1
             progressBar('#', 50, count, line_num)
