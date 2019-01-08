@@ -1,4 +1,5 @@
 import numpy as np
+import re
 
 class Length:
 
@@ -6,6 +7,17 @@ class Length:
         self._lens = {}
         for key in Fasta_obj._fasta:
             self._lens[key] = len(Fasta_obj._fasta[key])
+        self._idlist = list(self._lens.keys())
+
+    def __getitem__(self, _id_str):  
+        try:
+            return self._lens[_id_str]
+        except KeyError:
+            print('Fuzzy matching...')
+            for full_id in self._idlist:
+                if re.search(_id_str, full_id):
+                    print('Matched:', full_id)
+                    return self._lens[full_id]
 
     def _sort(self, desc):
         sortlist = []

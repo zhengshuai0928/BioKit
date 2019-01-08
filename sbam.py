@@ -8,3 +8,4 @@ def progressBar(symbol, symbol_num, count, total):
 from SBAM.fasta import *
 from SBAM.sequence import *
 from SBAM.utilities import *
+print('Warning: You gonna love using this module!^_^')

@@ -110,11 +110,21 @@ class Fasta:
                               top_level['start'], 
                               top_level['end']))
             seq = ''
+            locs = []
             for line in anno:
                 if line['type'] == feature:
                     start = int(line['start']) - 1
                     end = int(line['end'])
-                    seq += self[seqid][start:end]
+                    locs.append([start, end])
+            locs.sort(key=lambda x: x[0])
+            for item in locs:
+                if seq:
+                    if item[0] > last_item[-1]:
+                        seq += self[seqid][item[0]:item[-1]]
+                        last_item = item
+                else:
+                    seq += self[seqid][item[0]:item[-1]]
+                    last_item = item
             if strand == '-':
                 seq = seq[::-1]
             out.write(title + '\n')
