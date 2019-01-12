@@ -5,7 +5,8 @@ def progressBar(symbol, symbol_num, count, total):
                       * symbol_count), count / total * 100)))
     sys.stdout.flush()
 
-from SBAM.fasta import *
-from SBAM.sequence import *
-from SBAM.utilities import *
+from SBM.fasta import *
+from SBM.sequence import *
+from SBM.utilities import *
+print('Simplified Bioinformatics Module (SBM) 1.0')
 print('Warning: You gonna love using this module!^_^')

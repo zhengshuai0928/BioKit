@@ -1,4 +1,4 @@
-from SBAM.fasta import Fasta
+from SBM.fasta import Fasta
 import os
 import glob
 

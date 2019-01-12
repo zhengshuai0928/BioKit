@@ -3,9 +3,9 @@ import os
 import sys
 import re
 import gc
-from sbam import progressBar
-from SBAM.length import *
-from SBAM.table import *
+from sbm import progressBar
+from SBM.length import *
+from SBM.table import *
 
 class Fasta:
 
