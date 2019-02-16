@@ -9,4 +9,4 @@ from SBM.fasta import *
 from SBM.sequence import *
 from SBM.utilities import *
 print('Simplified Bioinformatics Module (SBM) 1.0')
-print('Warning: You gonna love using this module!^_^')
+print('You gonna love using this module!^_^')
