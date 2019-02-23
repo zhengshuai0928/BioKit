@@ -10,7 +10,7 @@ from SBM.table import *
 class Fasta:
 
     def __init__(self, fasta_path):
-        print('Reading in...')        
+        print('Fasta reading in...')        
         self._fasta = {}
         line_count = os.popen('wc -l %s'%fasta_path).read()
         line_num = int(line_count.split(' ')[0])
@@ -105,7 +105,6 @@ class Fasta:
         for anno in gf:
             top_level = anno[0]
             seqid  = '>' + top_level['seqid']
-            strand = top_level['strand']
             title = '_'.join((seqid, 
                               top_level['start'], 
                               top_level['end']))
@@ -125,8 +124,6 @@ class Fasta:
                 else:
                     seq += self[seqid][item[0]:item[-1]]
                     last_item = item
-            if strand == '-':
-                seq = seq[::-1]
             out.write(title + '\n')
             out.write(seq + '\n')
         out.close()
